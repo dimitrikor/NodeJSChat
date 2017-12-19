@@ -219,12 +219,13 @@ router.post('/:id/users', (req, res) => {
   })
 })
 
-router.delete('/:id/users', (req, res) => {
-  const { id } = security.xssClean(req.params)
-  const data = security.xssClean(req.body)
+// Das ist mein Delete Request
+router.delete('/:id/users/:user_id', (req, res) => {
+const { id } = security.xssClean(req.params)
+const { user_id } = security.xssClean(req.params)
 
-  db.fetchManyByField('room_users', 'room_id', id).then((roomusers) => {
-    const roomuser = roomusers.find((roomuser) => roomuser.user_id === data.user_id)
+db.fetchManyByField('room_users', 'room_id', id).then((roomusers) => {
+    const roomuser = roomusers.find((roomuser) => roomuser.user_id === user_id)
     if (roomuser) {
       db.deleteOneByID('room_users', roomuser.id).then(() => {
         global.socket.emit('rooms.user_left', roomuser)

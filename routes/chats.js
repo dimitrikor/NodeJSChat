@@ -103,7 +103,7 @@ router.get('/:id', (req, res) => {
     order: 'ASC'
   }
 
-  const { id } = security.xssClean(req.params)
+  const id = security.xssClean(req.params)
   const { limit, order } = Object.assign(defaults, security.xssClean(req.query))
 
   db.fetchManyOrderedByField(table, 'room_id', id, 'create_date, millisecond', order).then((messages) => {
