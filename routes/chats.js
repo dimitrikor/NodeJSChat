@@ -103,8 +103,8 @@ router.get('/:id', (req, res) => {
     order: 'ASC'
   }
 
-  var id = security.xssClean(req.params)
-  var limit, order = Object.assign(defaults, security.xssClean(req.query))
+  const { id } = security.xssClean(req.params)
+  const { limit, order } = Object.assign(defaults, security.xssClean(req.query))
 
 
   db.fetchManyOrderedByField(table, 'room_id', id, 'create_date, millisecond', order).then((messages) => {
@@ -124,7 +124,7 @@ router.get('/:id', (req, res) => {
 
 // Delete all messages from room
 router.delete('/:id', (req, res) => {
-  var { id } = security.xssClean(req.params)
+  const { id } = security.xssClean(req.params)
 
   db.deleteManyByField(table, 'room_id', id).then(() => {
     global.socket.emit('chats.cleared', {
