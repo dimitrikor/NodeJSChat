@@ -21,6 +21,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.19.1",
     "morgan": "~1.9.0",
+    "node-gyp": "^3.6.2",
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
