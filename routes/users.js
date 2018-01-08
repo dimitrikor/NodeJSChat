@@ -34,9 +34,13 @@ router.post('/', (req, res) => {
   const data = security.xssClean(req.body)
 
   db.insertToTable(table, data).then((id) => {
+    const user = Object.assign(data, { id })
+
+    global.socket.emit('users.created', user)
+
     res.send({
       status: 'success',
-      data: Object.assign(data, { id })
+      data: user
     })
   }).catch((err) => {
     res.send({
@@ -85,13 +89,17 @@ router.put('/:id', (req, res) => {
   const { id } = security.xssClean(req.params)
   const data = security.xssClean(req.body)
 
-  db.fetchOneByID(table, id).then((one) => {
-    if (one) {
-      one = Object.assign(one, { id })
-      db.updateOneByID(table, Object.assign(one, data), id).then(() => {
+  db.fetchOneByID(table, id).then((user) => {
+    if (user) {
+      user = Object.assign(user, { id })
+      db.updateOneByID(table, Object.assign(user, data), id).then(() => {
+        const update = Object.assign(user, data)
+
+        global.socket.emit('users.changed', update)
+
         res.send({
           status: 'success',
-          data: Object.assign(one, data)
+          data: update
         })
       }).catch((err) => {
         res.send({
@@ -117,11 +125,27 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = security.xssClean(req.params)
 
-  db.deleteOneByID(table, id).then(() => {
-    res.send({
-      status: 'success',
-      data: null
-    })
+  db.fetchOneByID(table, id).then((user) => {
+    if (user) {
+      db.deleteOneByID(table, req.params.id).then(() => {
+        global.socket.emit('users.deleted', user)
+
+        res.send({
+          status: 'success',
+          data: null
+        })
+      }).catch((err) => {
+        res.send({
+          status: 'error',
+          message: err
+        })
+      })
+    } else {
+      res.send({
+        status: 'error',
+        message: 'user not found'
+      })
+    }
   }).catch((err) => {
     res.send({
       status: 'error',
